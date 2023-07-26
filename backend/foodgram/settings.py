@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
+    'core.apps.CoreConfig',
     'django_filters',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -154,11 +156,6 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'HIDE_USERS': False,
-    'SERIALIZERS': {
-        'user': 'api.serializers.UserGetSerializer',
-        'current_user': 'api.serializers.UserGetSerializer',
-        'user_create': 'api.serializers.UserSignUpSerializer',
-    },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
