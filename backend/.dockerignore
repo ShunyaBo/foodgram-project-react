@@ -1,6 +1,13 @@
-venv
+# .dockerignore
+venv/
+env/
 .git
-db.sqlite3
-.idea
-.vscode
 .env
+
+# IDE
+.vscode/
+.idea/
+
+# bd
+*.sqlite3
+media/
