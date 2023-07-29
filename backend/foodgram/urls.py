@@ -8,7 +8,7 @@ admin.site.index_title = 'Welcome, friend!'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api', include('api.urls', namespace='api')),
+    path('api/', include('api.urls', namespace='api')),
 ]
 
 # handler404 = 'core.views.page_not_found'

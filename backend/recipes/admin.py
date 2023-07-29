@@ -1,6 +1,7 @@
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
+from django.conf import settings
 from django.contrib import admin
 
 from .models import (Ingredient, Recipe, RecipeIngredient,
@@ -43,12 +44,12 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'recipe', 'ingredient', 'amount',)
+    search_fields = ('recipe', 'ingredient',)
 
 
 @admin.register(FavoriteRecipe)
 class FavoriteRecipeAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe',)
-    search_fields = ('user',)
 
 
 @admin.register(ShoppingCart)

@@ -1,10 +1,9 @@
+from django.urls import include, path
+from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import routers
-from django.urls import include, path, re_path
 
-from api.views import (FollowViewSet,
-                       IngredientViewSet,
+from api.views import (IngredientViewSet,
                        RecipeViewSet,
-                       SubscribeViewSet,
                        TagViewSet,
                        UserViewSet)
 
@@ -19,17 +18,11 @@ router_v1.register('ingredients',
                    basename='ingredients')
 router_v1.register('recipes', RecipeViewSet, basename='recipes')
 router_v1.register('users', UserViewSet, basename='users')
-# router_v1.register('users/subscriptions',
-#                    FollowViewSet,
-#                    basename='subscriptions')
-# router_v1.register(r'users/(?P<id>\d+)/subscribe',
-#                    SubscribeViewSet,
-#                    basename='subscribe')
 
 urlpatterns = [
-    path('users/subscriptions/', FollowViewSet, name='subscriptions'),
-    path('users/<int:user_id>/subscribe/', SubscribeViewSet, name='subscribe'),
+    path('users/set_password/',
+         DjoserUserViewSet.as_view({'post': 'set_password'})),
+    # path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
     path('', include(router_v1.urls)),
-    path('', include('djoser.urls')),
-    re_path('r^auth/', include('djoser.urls.authtoken')),
 ]

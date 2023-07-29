@@ -112,7 +112,6 @@ class Recipe(models.Model):
         verbose_name='Теги',
         help_text='Обязательное поле',
         blank=False,
-        # null=False,
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -120,7 +119,7 @@ class Recipe(models.Model):
         verbose_name='Список ингредиентов',
         help_text='Обязательное поле',
         blank=False,
-        # null=False,
+        default='морковь',
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления (в минутах)',
@@ -130,12 +129,12 @@ class Recipe(models.Model):
         null=False,
         validators=[
             MinValueValidator(
-                1, message='Время готовки должно быть больше или равно 1 минуте'
+                1, message='Время готовки должно быть >= 1 минуте'
             )
         ]
     )
     pub_date = models.DateTimeField(
-        verbose_name="Дата публикации",
+        verbose_name='Дата публикации',
         auto_now_add=True,
     )
 
@@ -165,10 +164,15 @@ class RecipeIngredient(models.Model):
         related_name='recipeingredients',
         verbose_name='Ингредиент'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveIntegerField(
         'Количество',
         blank=False,
-        null=False
+        null=False,
+        validators=[
+            MinValueValidator(
+                1, message='Количество ингредиентов не должно быть = 0'
+            )
+        ]
     )
 
     class Meta:
@@ -197,7 +201,7 @@ class FavoriteRecipe(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
-        unique_together = ('user', 'recipe')
+        # unique_together = ('user', 'recipe')
 
     def __str__(self):
         return f'{self.user.username} добавил {self.recipe.name} в избраннное'

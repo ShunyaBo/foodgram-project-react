@@ -71,17 +71,20 @@ class Follower(models.Model):
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='Подписчик',
+        help_text='Пользователь, который подписывается',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Автор',
+        help_text='Автор, на которого подписываются',
     )
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        unique_together = ('user', 'author')
 
     def __str__(self):
         return f'{self.user.username} подписан на {self.author.username}'
