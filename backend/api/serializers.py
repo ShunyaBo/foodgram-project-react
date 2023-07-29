@@ -125,8 +125,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     """
     author = UserSerializer()
     ingredients = IngredientChangeSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
-                                              many=True)
+    tags = serializers.SlugRelatedField(many=True,
+                                        queryset=Tag.objects.all(),
+                                        slug_field='id')
     image = Base64ImageField(max_length=None, use_url=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -203,46 +204,6 @@ class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
-    # """
-    # Вспомогательный сериализатор для добавления рецепта в избранное.
-    # POST-запросов на api/recipes/{id}/favorite/ и
-    # на /api/recipes/{id}/shopping_cart/.
-    # """
-    # image = serializers.SerializerMethodField()
-    # # name = написать http://127.0.0.1:8000/api/recipes/1/shopping_cart/ post
-    # # cooking_time = написать Field name `name` is not valid for model `RecipeIngredient`.
-
-    # def get_image(self, obj):
-    #     return f'{settings.MEDIA_URL}{obj.image}'
-
-    # class Meta:
-    #     model = RecipeIngredient
-    #     fields = ('id', 'name', 'image', 'cooking_time')
-
-
-# class FavoriteRecipeSerializer(serializers.ModelSerializer):
-#     """Сериализатор для работы с избранными рецептами."""
-#     class Meta:
-#         model = FavoriteRecipe
-#         fields = ('user', 'recipe')
-
-#     def to_representation(self, instance):
-#         request = self.context.get('request')
-#         return ShortRecipeSerializer(instance.recipe,
-#                                      context={'request': request}).data
-
-
-# class ShoppingCartSerializer(serializers.ModelSerializer):
-#     """Сериализатор для работы со списком рецептов."""
-#     class Meta:
-#         model = ShoppingCart
-#         fields = ('user', 'recipe')
-
-#     def to_representation(self, instance):
-#         request = self.context.get('request')
-#         return ShortRecipeSerializer(instance.recipe,
-#                                      context={'request': request}).data
-
 
 class FollowerSerializer(serializers.ModelSerializer):
     """"Сериализатор,предоставляющий информацию о подписках пользователя."""
@@ -260,18 +221,6 @@ class FollowerSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         return Follower.objects.filter(user=obj.user,
                                        author=obj.author).exists()
-
-    # def get_recipes(self, obj):
-    #     request = self.context.get('request')
-    #     recipes_limit = None
-    #     if request:
-    #         recipes_limit = request.query_params.get('recipes_limit')
-    #     recipes = obj.recipe_author.all()
-    #     if recipes_limit:
-    #         recipes = obj.recipe_author.all()[:int(recipes_limit)]
-    #     return FavoriteShoppingCartSerializer(
-    #         recipes, many=True,
-    #         context={'request': request}).data
 
     def get_recipes(self, obj):
         limit = self.context["request"].query_params.get("recipes_limit")
