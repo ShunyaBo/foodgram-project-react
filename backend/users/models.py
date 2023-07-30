@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -7,12 +8,12 @@ from .validators import validate_username
 
 class User(AbstractUser):
     """Класс кастомных пользователей."""
-    MAX_LENGTH_EMAIL = 254
-    MAX_LENGTH_OTHER_FIELDS = 150
-    REDEX = r'^[\w.@+-]+$'
+    # MAX_LENGTH_USER_EMAIL = 254
+    # MAX_LENGTH_USER_OTHER_FIELDS = 150
+    # REDEX_USER_USERNAME = r'^[\w.@+-]+$'
 
     email = models.EmailField(
-        max_length=MAX_LENGTH_EMAIL,
+        max_length=settings.MAX_LENGTH_USER_EMAIL,
         verbose_name='Электронная почта',
         help_text='Обязательное поле',
         unique=True,
@@ -20,34 +21,34 @@ class User(AbstractUser):
         null=False,
     )
     username = models.CharField(
-        max_length=MAX_LENGTH_OTHER_FIELDS,
+        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Никнейм',
         help_text='Обязательное поле',
         unique=True,
         blank=False,
         null=False,
         validators=[RegexValidator(
-            regex=REDEX,
+            regex=settings.REDEX_USER_USERNAME,
             message='Неверный формат Никнейма.'),
                     validate_username,
                     ]
     )
     first_name = models.CharField(
-        max_length=MAX_LENGTH_OTHER_FIELDS,
+        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Имя',
         help_text='Обязательное поле',
         blank=False,
         null=False,
     )
     last_name = models.CharField(
-        max_length=MAX_LENGTH_OTHER_FIELDS,
+        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Фамилия',
         help_text='Обязательное поле',
         blank=False,
         null=False,
     )
     password = models.CharField(
-        max_length=MAX_LENGTH_OTHER_FIELDS,
+        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Пароль',
         help_text='Обязательное поле',
         blank=False,

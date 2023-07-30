@@ -1,7 +1,9 @@
 import base64
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -21,7 +23,7 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(UserCreateSerializer):
     """Сериализатор для пользователей."""
     is_subscribed = serializers.SerializerMethodField()
 
@@ -57,6 +59,9 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     Сериализатор для ингредиентов в рецепте.
     При GET запросах - Получение рецепта/списка рецептов.
     """
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(),
+    )
 
     class Meta:
         model = RecipeIngredient
@@ -72,15 +77,29 @@ class IngredientChangeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
+#  альтернативный сериализатор для сохранения рецептов
+    # def to_representation(self, value):
+    #     """Функция получения значения из базы."""
+    #     return value
+
+    # def to_internal_value(self, data):
+    #     """Функция записи значения в базу."""
+    #     try:
+    #         ingredient = Ingredient.objects.get(id=data['id'])
+    #     except ObjectDoesNotExist:
+    #         raise serializers.ValidationError({'id': 'doesnt exists'})
+    #     return RecipeIngredient.objects.create(
+    #         ingredient=ingredient, amount=data['amount']
+    #     )
+
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount')
-        validators = (
+        validators = [
             UniqueTogetherValidator(
                 queryset=RecipeIngredient.objects.all(),
-                fields=('ingredient', 'recipe')
-            )
-        )
+                fields=('ingredient', 'recipe'))
+        ]
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
@@ -131,6 +150,22 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(max_length=None, use_url=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+
+# алтернатива но нужен другой сериализатор для ingredients
+    # def create(self, validated_data):
+    #     tags = validated_data.pop('tags')
+    #     ingredients = validated_data.pop('ingredients')
+    #     recipe = Recipe.objects.create(
+    #         author=self.context['request'].user, **validated_data
+    #     )
+    #     recipe.tags.set(tags)
+    #     recipe.ingredients.set(ingredients)
+    #     if self.is_valid(raise_exception=True):
+    #         return recipe
+
+    # def to_representation(self, instance):
+    #     return RecipeGetSerializer(instance=instance,
+    #                                context=self.context).data
 
     def recipe_ingredients_amount(self, recipes, tags_data, ingredients_data):
         """

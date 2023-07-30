@@ -133,4 +133,5 @@ dmypy.json
 
 media/
 static/
+collected_static/
 *.bak

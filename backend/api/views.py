@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
                                      ReadOnlyModelViewSet)
 
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import LimitPagePagination
 from api.permissions import IsAuthorAdmin
 from api.serializers import (FavoriteShoppingCartSerializer,
@@ -45,8 +45,8 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny, )
-    filter_backends = (filters.SearchFilter)
-    search_fields = ('name',)
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = IngredientFilter
     pagination_class = None
 
 
@@ -73,6 +73,8 @@ class RecipeViewSet(mixins.ListModelMixin,
     pagination_class = LimitPagePagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
+
+    lookup_field = 'id'
 
     def get_serializer_class(self):
         """Выбор сериализатора в зависимости от метода."""
@@ -181,6 +183,11 @@ class UserViewSet(ModelViewSet):
         """Получение пользователем данных о себе (users/me)."""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, *args, **kwargs):
+        user = get_object_or_404(User, pk=kwargs.get('id'))
+        serializer = self.get_serializer(user)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=('post', 'delete',),
             detail=True,

@@ -34,14 +34,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework.authtoken',
     'rest_framework',
+    'rest_framework.authtoken',
+    'django_filters',
     'djoser',
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
-    'core.apps.CoreConfig',
-    'django_filters',
+    # 'core.apps.CoreConfig',
     'import_export',
 ]
 
@@ -76,22 +76,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'foodgram'),
-#         'USER': os.getenv('POSTGRES_USER', 'foodgram_user'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', '123'),
-#         'HOST': os.getenv('DB_HOST', 'db'),
-#         'DB_PORT': os.getenv('DB_PORT', '5432'),
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'foodgram'),
+        'USER': os.getenv('POSTGRES_USER', 'foodgram_user'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', '123'),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'DB_PORT': os.getenv('DB_PORT', '5432'),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -130,7 +130,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'collected_static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -174,3 +174,14 @@ DJOSER = {
 AUTH_USER_MODEL = 'users.User'
 
 EMPLY_VALUE_DISPLAY = '-пусто-'
+
+# recipes/models.py
+MAX_LENGTH_CHARFIELD = 200
+MAX_LENGTH_TAG_COLOR = 7
+REDEX_TAG_SLUG = r'^[-a-zA-Z0-9_]+$'
+MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT = 1
+
+# users/models.py
+MAX_LENGTH_USER_EMAIL = 254
+MAX_LENGTH_USER_CHARFIELD = 150
+REDEX_USER_USERNAME = r'^[\w.@+-]+$'

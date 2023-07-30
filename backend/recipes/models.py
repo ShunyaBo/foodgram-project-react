@@ -1,10 +1,11 @@
+from django.conf import settings
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
 from users.models import User
 
 
-MAX_LENGTH_FIELD = 200
+# MAX_LENGTH_CHARFIELD = 200
 
 
 class Tag(models.Model):
@@ -12,32 +13,32 @@ class Tag(models.Model):
     Класс Тег, для группировки рецептов по тегам.
     Связь с Recipe через Many-To-Many.
     """
-    MAX_LENGTH_COLOR = 7
-    REDEX = r'^[-a-zA-Z0-9_]+$'
+    # MAX_LENGTH_TAG_COLOR = 7
+    # REDEX_TAG_SLUG = r'^[-a-zA-Z0-9_]+$'
 
     name = models.CharField(
-        max_length=MAX_LENGTH_FIELD,
+        max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
         blank=False,
         null=False,
     )
     color = models.CharField(
-        max_length=MAX_LENGTH_COLOR,
+        max_length=settings.MAX_LENGTH_TAG_COLOR,
         verbose_name='Цвет',
         help_text='Обязательное поле, Цветовой HEX-код, пример #63C144',
         blank=False,
         null=False,
     )
     slug = models.SlugField(
-        max_length=MAX_LENGTH_FIELD,
+        max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Слаг',
         help_text='Обязательное поле, Латинскими буквами',
         unique=True,
         blank=False,
         null=False,
         validators=[RegexValidator(
-            regex=REDEX,
+            regex=settings.REDEX_TAG_SLUG,
             message='Неверный формат Никнейма.')])
 
     class Meta:
@@ -54,7 +55,7 @@ class Ingredient(models.Model):
     Связь с Recipe через модель RecipeIngredient (Many-To-Many).
     """
     name = models.CharField(
-        max_length=MAX_LENGTH_FIELD,
+        max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
         blank=False,
@@ -62,7 +63,7 @@ class Ingredient(models.Model):
     )
 
     measurement_unit = models.CharField(
-        max_length=MAX_LENGTH_FIELD,
+        max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Единицы измерения',
         help_text='Обязательное поле',
         blank=False,
@@ -81,7 +82,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     """Класс, описывающий рецепты."""
     name = models.CharField(
-        max_length=MAX_LENGTH_FIELD,
+        max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
         blank=False,
@@ -129,8 +130,10 @@ class Recipe(models.Model):
         null=False,
         validators=[
             MinValueValidator(
-                1, message='Время готовки должно быть >= 1 минуте'
-            )
+                settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
+                message=f'Время приготовления должно быть больше или равно'
+                        f' {settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT}'
+                        f' минуте')
         ]
     )
     pub_date = models.DateTimeField(
@@ -156,7 +159,6 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         related_name='recipeingredients',
         verbose_name='Рецепт'
-
     )
     ingredient = models.ForeignKey(
         Ingredient,
@@ -170,8 +172,9 @@ class RecipeIngredient(models.Model):
         null=False,
         validators=[
             MinValueValidator(
-                1, message='Количество ингредиентов не должно быть = 0'
-            )
+                settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
+                message=f'Количество ингредиентов должно быть больше или равно'
+                        f' {settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT}')
         ]
     )
 
