@@ -21,7 +21,7 @@ class RecipeFilter(FilterSet):
     def is_favorited_filter(self, queryset, name, value):
         user = self.request.user
         if value and user.is_authenticated:
-            return queryset.filters(favorite__user=user)
+            return queryset.filter(favorite__user=user)
         return queryset
 
     def is_in_shopping_cart_filter(self, queryset, name, value):
@@ -40,25 +40,3 @@ class IngredientFilter(FilterSet):
         fields = ('name', )
 # class IngredientSearchFilter(SearchFilter):
 #     search_param = 'name'
-
-# class IngredientFilter(FilterSet):
-#     name = filters.CharFilter(method='search_ingredients')
-
-#     class Meta:
-#         model = Ingredient
-#         fields = ('name',)
-
-#     def search_ingredients(self, queryset, name, value):
-#         if not value:
-#             return queryset
-#         start_with_queryset = queryset.filter(
-#             name__istartswith=value
-#         ).annotate(order=Value(0, IntegerField()))
-#         contain_queryset = (
-#             queryset.filter(name__icontains=value)
-#             .exclude(
-#                 pk__in=(ingredient.pk for ingredient in start_with_queryset)
-#             )
-#             .annotate(order=Value(1, IntegerField()))
-#         )
-#         return start_with_queryset.union(contain_queryset).order_by("order")

@@ -30,13 +30,20 @@ class IngredientAdmin(ImportExportModelAdmin):
     ordering = ('id',)
 
 
+# class IngredientsInline(admin.TabularInline):
+#     model = RecipeIngredient
+#     extra = 1
+
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    # inlines = [IngredientsInline]
     list_display = ('id', 'name', 'author', 'amount_favorites',)
     search_fields = ('name', 'author',)
     list_filter = ('author', 'name', 'tags',)
+    # readonly_fields = ('author', 'amount_favorites')
 
-    @admin.display(description="Amount of recipe in favorites")
+    @admin.display(description='Количество рецептов в избранном')
     def amount_favorites(self, obj):
         return obj.favorite.count()
 
