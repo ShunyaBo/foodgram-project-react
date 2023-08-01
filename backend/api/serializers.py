@@ -22,6 +22,15 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
+class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор для вывода рецептов в избранном и списке покупок."""
+    image = Base64ImageField(max_length=None, use_url=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class UserSerializer(UserCreateSerializer):
     """Сериализатор для пользователей."""
     is_subscribed = serializers.SerializerMethodField()
@@ -224,15 +233,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ).data
 
 
-class FavoriteShoppingCartSerializer(serializers.ModelSerializer):
-    """Сериализатор для вывода рецептов в избранном и списке покупок."""
-    image = Base64ImageField(max_length=None, use_url=True)
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-
-
 class FollowerSerializer(serializers.ModelSerializer):
     """"
     Сериализатор,предоставляющий информацию о подписках пользователя.
@@ -257,7 +257,7 @@ class FollowerSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         limit = self.context['request'].query_params.get('recipes_limit')
-        query = obj.recipe_author.all()
+        query = obj.recipes.all()
         if limit:
             query = query[: int(limit)]
         recipes = FavoriteShoppingCartSerializer(query, many=True)

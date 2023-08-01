@@ -82,7 +82,7 @@ class RecipeViewSet(mixins.ListModelMixin,
 
     def get_serializer_class(self):
         """Выбор сериализатора в зависимости от метода."""
-        if self.action == "list" or self.action == "retrieve":
+        if self.action == 'list' or self.action == 'retrieve':
             return RecipeGetSerializer
         return RecipeCreateSerializer
 
@@ -227,26 +227,29 @@ class RecipeViewSet(mixins.ListModelMixin,
     #         return self.method_delete(request, ShoppingCart,
     #                                   id, error_message)
 
-    @action(methods=('get'),
-            detail=False,
-            permission_classes=[IsAuthenticated],)
-    def download_shopping_cart(self, request):
-        """Создаем список покупок и скачиваем файл со списком покупок."""
-        user = request.user
-        shopping_dict = RecipeIngredient.objects.filter(
-            recipes__shopping_cart___user=user).values(
-                'ingredient__name',
-                'ingredient__measurement_unit').annotate(
-                    amount=Sum('amount'))
-        shopping_list = list()
-        shopping_list.append('Список покупок:\n')
-        for item in shopping_dict:
-            shopping_list.append(
-                f'{item} - ({shopping_dict[item]["measurement_unit"]}) - '
-                f'{shopping_dict[item]["amount"]} \n')
-        response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = 'attachment; filename="yourlist.txt"'
-        return response
+    # @action(methods=['get'],
+    #         detail=False,
+    #         permission_classes=[IsAuthenticated],)
+    # def download_shopping_cart(self, request):
+    #     """Создаем список покупок и скачиваем файл со списком покупок."""
+    #     user = get_object_or_404(User, username=request.user)
+    #     shopping_dict = (RecipeIngredient.objects
+    #                      .filter(recipe__shopping_cart___user=user)
+    #                      .values('ingredient__name',
+    #                              'ingredient__measurement_unit')
+    #                      .annotate(amount=Sum('amount')))
+    #     shopping_list = list()
+    #     for ingredient in shopping_dict:
+    #         shopping_list.append(
+    #             f'{ingredient["ingredient__name"]} - '
+    #             f'{ingredient["ingredient__measurement_unit"]} - '
+    #             f'{ingredient["amount"]}'
+    #         )
+
+    #         download_list =  '\n'.join(shopping_list)
+    #     response = HttpResponse(download_list, content_type='text/plain')
+    #     response['Content-Disposition'] = 'attachment; filename="yourlist.txt"'
+    #     return response
 
 
 class UserViewSet(ModelViewSet):
@@ -256,6 +259,12 @@ class UserViewSet(ModelViewSet):
     pagination_class = LimitPagePagination
 
     lookup_field = 'id'
+
+    # def get_serializer_class(self):
+    #     """Выбор сериализатора в зависимости от метода."""
+    #     if self.action == 'me' or self.action == 'retrieve':
+    #         return UserSerializer
+    #     return FollowerSerializer
 
     @action(methods=('get',),
             detail=False,
@@ -284,6 +293,7 @@ class UserViewSet(ModelViewSet):
             Follower.objects.create(user=user, author=author,)
             serializer = FollowerSerializer(author,
                                             context={"request": request},)
+            # serializer = self.get_serializer(author, many=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             author_del = Follower.objects.filter(user=user, author=author,)
@@ -294,16 +304,19 @@ class UserViewSet(ModelViewSet):
 
     @action(methods=('get',),
             detail=False,
-            permission_classes=[IsAuthenticated],)
+            permission_classes=[IsAuthenticated],
+            serializer_class=FollowerSerializer,)
     def subscriptions(self, request, *args, **kwargs):
         """Получение списка всех подписок на пользователей."""
         user = get_object_or_404(User, username=request.user)
         following = User.objects.filter(following__user=user)
         pages = self.paginate_queryset(following)
-        if pages is not None:
-            serializer = FollowerSerializer(
-                pages, many=True, context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
+        # if pages is not None:
+        #     serializer = FollowerSerializer(
+        #         pages, many=True, context={'request': request}
+        #     )
+        #     return self.get_paginated_response(serializer.data)
+        # serializer = self.get_serializer(pages, many=True)
+        # return Response(serializer.data)
         serializer = self.get_serializer(pages, many=True)
-        return Response(serializer.data)
+        return self.get_paginated_response(serializer.data)
