@@ -135,7 +135,7 @@ class RecipeViewSet(mixins.ListModelMixin,
                                 'ingredient__measurement_unit')
                         .annotate(amount=Sum('amount')))
         shopping_list = list()
-        shopping_list.append('Ваш список покупок:\n')
+        shopping_list.append('Ваш список покупок от Foodgram:\n')
         for ingredient in shoppinglist:
             shopping_list.append(
                 f'{ingredient["ingredient__name"]} - '

@@ -14,6 +14,7 @@ class Tag(models.Model):
         max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
+        unique=True,
         blank=False,
         null=False,
     )
@@ -21,6 +22,7 @@ class Tag(models.Model):
         max_length=settings.MAX_LENGTH_TAG_COLOR,
         verbose_name='Цвет',
         help_text='Обязательное поле, Цветовой HEX-код, пример #63C144',
+        unique=True,
         blank=False,
         null=False,
     )

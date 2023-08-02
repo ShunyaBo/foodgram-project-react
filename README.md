@@ -40,21 +40,20 @@ ___
 
 ___
 
-## Установка
+## Установка и запуск проекта локально
 
 1. Клонируйте репозиторий на свой компьютер:
 
     ```bash
     git clone git@github.com:ShunyaBo/foodgram-project-react.git
-    ```
-    ```bash
+
     cd foodgram-project-react
     ```
 2. Создайте файл .env и заполните его своими данными. Перечень данных указан в файле .env.example.
-3. Cоздайте и активировать виртуальное окружение:
+3. Cоздайте и активируйте виртуальное окружение:
 
     ```bash
-    python -m venv venv
+    python3 -m venv venv
     
     Linux: source venv/bin/activate
     Windows: source venv/Scripts/activate
@@ -64,8 +63,59 @@ ___
 
     ```bash
     python3 -m pip install --upgrade pip
+
     pip install -r requirements.txt
     ```
+
+5. В директории foodgram-project-react/infra/ запустите docker-compose:
+
+    ```bash
+    cd infra
+
+    docker-compose up
+    ```
+
+6. Когда контейнеры собраны в новом окне терминала выполните миграции:
+
+    ```bash
+    docker-compose exec backend python manage.py migrate
+    ```
+
+7. Создайте суперпользователя:
+
+    ```bash
+    docker-compose exec backend python manage.py createsuperuser
+    ```
+
+8. Загрузите статику:
+
+    ```bash
+    docker-compose exec backend python manage.py collectstatic --no-input 
+    ```
+
+9. Проверьте работу проекта по ссылке:
+
+    ```bash
+    http://localhost/
+    ```
+
+10. Все доступные ендпоинты можно посмотреть в документации по ссылке:
+    ```bash
+    http://localhost/api/docs/
+    ```
+
+11. Зайдите в админ-панель по ссылке:
+
+    ```bash
+    http://localhost/admin
+    ```
+
+12. Загрузите в БД информацию об ингредиентах через админ-панель:
+
+    - в админ-панеле зайдите в раздел ингредиенты
+    - нажмите кнопку - импорт
+    - выберете файл с разрешением json из папки data
+    - выберете формат - json и импортируйте.
 
 ___
 
@@ -88,8 +138,6 @@ ___
                                    # подключение к удалённому серверу (cat ~/.ssh/id_rsa)
     SSH_PASSPHRASE                 # кодовая фраза (пароль) для ssh-ключа
 
-    TELEGRAM_TO                    # id телеграм-аккаунта (можно узнать у @userinfobot, команда /start)
-    TELEGRAM_TOKEN                 # токен бота (получить токен можно у @BotFather, /token, имя бота)
     ```
 ___
 
@@ -110,160 +158,55 @@ ___
     ```
 Подробнее про установку можно прочитать [здесь](https://docs.docker.com/engine/install/ubuntu/)
 
-Скопировать на сервер файлы docker-compose.yaml и default.conf:
+3. Скопируйте на сервер файлы docker-compose.production и default.conf и .env:
 
-```
-scp docker-compose.yml <логин_на_сервере>@<IP_сервера>:/home/<логин_на_сервере>/docker-compose.yml
-scp nginx.conf <логин_на_сервере>@<IP_сервера>:/home/<логин_на_сервере>/nginx.conf
+    ```bash
+    scp docker-compose.yml <логин_на_сервере>@<IP_сервера>:/home/<логин_на_сервере>/docker-compose.yml
+    scp nginx.conf <логин_на_сервере>@<IP_сервера>:/home/<логин_на_сервере>/nginx.conf
+    ```
 
-```
+4. Выполните команды:
 
-
-
-Выполнить команды:
-
-*   git add .
-*   git commit -m "Коммит"
-*   git push
+    ```bash
+    git add .
+    git commit -m "Коммит"
+    git push
+    ```
 
 После этого будут запущены процессы workflow:
 
-*   проверка кода на соответствие стандарту PEP8 (с помощью пакета flake8) и запуск pytest
-*   сборка и доставка докер-образа для контейнера web на Docker Hub
-*   автоматический деплой проекта на боевой сервер
-*   отправка уведомления в Telegram о том, что процесс деплоя успешно завершился
+- проверка кода на соответствие стандарту PEP8 (с помощью пакета flake8) и запуск pytest
+- сборка и доставка докер-образа для контейнера backend на Docker Hub
+- автоматический деплой проекта на боевой сервер
 
-После успешного завершения процессов workflow на боевом сервере должны будут выполнены следующие команды:
 
-```
-sudo docker-compose exec web python manage.py migrate
+5. После успешного завершения процессов workflow на сервере выполним следующие команды:
 
-sudo docker-compose exec web python manage.py collectstatic --no-input 
-```
+- Сделать миграции: 
 
-Затем необходимо будет создать суперюзера и загрузить в базу данных информацию об ингредиентах:
+    ```bash
+    sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+    ```
 
-```
-sudo docker-compose exec web python manage.py createsuperuser
+- Собрать статические файлы для корректного отображения страниц: 
 
-```
+    ```bash
+    udo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input 
+    ```
 
-```
-sudo docker-compose exec web python manage.py load_data_csv --path <путь_к_файлу> --model_name <имя_модели> --app_name <название_приложения>
+- Создать суперюзера:
 
-```
+    ```bash
+    sudo docker compose -f docker-compose.production.yml exec -it backend python manage.py createsuperuser 
+    ```
 
-### Как запустить проект локально в контейнерах:
+- Загрузить в БД информацию об ингредиентах через админ-панель:
 
-Клонировать репозиторий и перейти в него в командной строке:
+    - в админ-панеле зайдите в раздел ингредиенты;
+    - нажмите кнопку - импорт;
+    - выберете файл с разрешением json из папки data;
+    - выберете формат - json и импортируйте.
 
-``` git@github.com:mariyabykova/foodgram-project-react.git ``` 
-``` cd foodgram-project-react ``` 
-
-Запустить docker-compose:
-
-```
-docker compose up
-
-```
-
-После окончания сборки контейнеров выполнить миграции:
-
-```
-docker-compose exec web python manage.py migrate
-
-```
-
-Создать суперпользователя:
-
-```
-docker-compose exec web python manage.py createsuperuser
-
-```
-
-Загрузить статику:
-
-```
-docker-compose exec web python manage.py collectstatic --no-input 
-
-```
-
-Проверить работу проекта по ссылке:
-
-```
-http://localhost/
-```
-___
-### Как запустить проект локально:
-
-Клонировать репозиторий и перейти в него в командной строке:
-
-``` git clone <ссылка с github> ``` 
-``` cd foodgram-project-react ``` 
-
-Создать и активировать виртуальное окружение:
-
-``` python3 -m venv venv ``` 
-
-* Если у вас Linux/macOS:
-    ``` source venv/bin/activate ``` 
-
-* Если у вас Windows:
-    ``` source venv/Scripts/activate ```
-    
-``` python3 -m pip install --upgrade pip ``` 
-
-Установить зависимости из файла requirements:
-
-``` pip install -r requirements.txt ``` 
-
-Выполнить миграции:
-
-``` python3 manage.py migrate ``` 
-
-Запустить проект:
-
-``` python3 manage.py runserver ``` 
-___
-### В API доступны следующие эндпоинты:
-
-* ```/api/users/```  Get-запрос – получение списка пользователей. POST-запрос – регистрация нового пользователя. Доступно без токена.
-
-* ```/api/users/{id}``` GET-запрос – персональная страница пользователя с указанным id (доступно без токена).
-
-* ```/api/users/me/``` GET-запрос – страница текущего пользователя. PATCH-запрос – редактирование собственной страницы. Доступно авторизированным пользователям. 
-
-* ```/api/users/set_password``` POST-запрос – изменение собственного пароля. Доступно авторизированным пользователям. 
-
-* ```/api/auth/token/login/``` POST-запрос – получение токена. Используется для авторизации по емейлу и паролю, чтобы далее использовать токен при запросах.
-
-* ```/api/auth/token/logout/``` POST-запрос – удаление токена. 
-
-* ```/api/tags/``` GET-запрос — получение списка всех тегов. Доступно без токена.
-
-* ```/api/tags/{id}``` GET-запрос — получение информации о теге о его id. Доступно без токена. 
-
-* ```/api/ingredients/``` GET-запрос – получение списка всех ингредиентов. Подключён поиск по частичному вхождению в начале названия ингредиента. Доступно без токена. 
-
-* ```/api/ingredients/{id}/``` GET-запрос — получение информации об ингредиенте по его id. Доступно без токена. 
-
-* ```/api/recipes/``` GET-запрос – получение списка всех рецептов. Возможен поиск рецептов по тегам и по id автора (доступно без токена). POST-запрос – добавление нового рецепта (доступно для авторизированных пользователей).
-
-* ```/api/recipes/?is_favorited=1``` GET-запрос – получение списка всех рецептов, добавленных в избранное. Доступно для авторизированных пользователей. 
-
-* ```/api/recipes/is_in_shopping_cart=1``` GET-запрос – получение списка всех рецептов, добавленных в список покупок. Доступно для авторизированных пользователей. 
-
-* ```/api/recipes/{id}/``` GET-запрос – получение информации о рецепте по его id (доступно без токена). PATCH-запрос – изменение собственного рецепта (доступно для автора рецепта). DELETE-запрос – удаление собственного рецепта (доступно для автора рецепта).
-
-* ```/api/recipes/{id}/favorite/``` POST-запрос – добавление нового рецепта в избранное. DELETE-запрос – удаление рецепта из избранного. Доступно для авторизированных пользователей. 
-
-* ```/api/recipes/{id}/shopping_cart/``` POST-запрос – добавление нового рецепта в список покупок. DELETE-запрос – удаление рецепта из списка покупок. Доступно для авторизированных пользователей. 
-
-* ```/api/recipes/download_shopping_cart/``` GET-запрос – получение текстового файла со списком покупок. Доступно для авторизированных пользователей. 
-
-* ```/api/users/{id}/subscribe/``` GET-запрос – подписка на пользователя с указанным id. POST-запрос – отписка от пользователя с указанным id. Доступно для авторизированных пользователей
-
-* ```/api/users/subscriptions/``` GET-запрос – получение списка всех пользователей, на которых подписан текущий пользователь Доступно для авторизированных пользователей. 
 ___
 ### Автор
 [Mariya - ShunyaBo](https://github.com/ShunyaBo)
