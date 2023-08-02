@@ -24,12 +24,9 @@ class User(AbstractUser):
         unique=True,
         blank=False,
         null=False,
-        validators=[RegexValidator(
-            regex=settings.REDEX_USER_USERNAME,
-            message='Неверный формат Никнейма.'),
-                    validate_username,
-                    ]
-    )
+        validators=[RegexValidator(regex=settings.REDEX_USER_USERNAME,
+                                   message='Неверный формат Никнейма.'),
+                    validate_username])
     first_name = models.CharField(
         max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Имя',
