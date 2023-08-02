@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
-    # 'core.apps.CoreConfig',
     'import_export',
 ]
 
@@ -167,7 +166,6 @@ DJOSER = {
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny'],
-        # 'user_delete': ('rest_framework.permissions.IsAdminUser'), почему-то не срабатывает? почему?
     }
 }
 

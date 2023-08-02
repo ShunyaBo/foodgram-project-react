@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (FavoriteRecipe, Ingredient,
                             Recipe, RecipeIngredient,
@@ -82,8 +81,8 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     Сериализатор для ингредиентов в рецепте.
     """
     id = serializers.PrimaryKeyRelatedField(
-            queryset=Ingredient.objects.all(),
-            source='ingredient')
+        queryset=Ingredient.objects.all(),
+        source='ingredient')
     name = serializers.CharField(source='ingredient.name', read_only=True)
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit',
@@ -111,7 +110,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author',  'ingredients',
+        fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time')
         read_only_fields = ('id', 'author', 'tags', 'ingredients')
@@ -145,22 +144,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(max_length=None, use_url=True)
     # is_favorited = serializers.SerializerMethodField()
     # is_in_shopping_cart = serializers.SerializerMethodField()
-
-# алтернатива но нужен другой сериализатор для ingredients
-    # def create(self, validated_data):
-    #     tags = validated_data.pop('tags')
-    #     ingredients = validated_data.pop('ingredients')
-    #     recipe = Recipe.objects.create(
-    #         author=self.context['request'].user, **validated_data
-    #     )
-    #     recipe.tags.set(tags)
-    #     recipe.ingredients.set(ingredients)
-    #     if self.is_valid(raise_exception=True):
-    #         return recipe
-
-    # def to_representation(self, instance):
-    #     return RecipeGetSerializer(instance=instance,
-    #                                context=self.context).data
 
     def recipe_ingredients_amount(self, recipes, tags_data, ingredients_data):
         """
@@ -221,7 +204,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author',  'ingredients',
+        fields = ('id', 'tags', 'author', 'ingredients',
                   # 'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time')
         read_only_fields = ('id', 'author', 'tags', 'ingredients')
