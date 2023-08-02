@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -9,24 +9,16 @@ from rest_framework.response import Response
 from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
                                      ReadOnlyModelViewSet)
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
-
-
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import LimitPagePagination
 from api.permissions import IsAuthorAdmin
 from api.serializers import (FavoriteShoppingCartSerializer,
-                             FollowerSerializer,
-                             IngredientSerializer,
-                             RecipeGetSerializer,
-                             RecipeCreateSerializer,
-                             TagSerializer,
-                             UserSerializer)
-from recipes.models import (FavoriteRecipe, Ingredient,
-                            Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
-from users.models import User, Follower
+                             FollowerSerializer, IngredientSerializer,
+                             RecipeCreateSerializer, RecipeGetSerializer,
+                             TagSerializer, UserSerializer)
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
+                            RecipeIngredient, ShoppingCart, Tag)
+from users.models import Follower, User
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -78,8 +70,6 @@ class RecipeViewSet(mixins.ListModelMixin,
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
-    lookup_field = 'id'
-
     def get_serializer_class(self):
         """Выбор сериализатора в зависимости от метода."""
         if self.action == 'list' or self.action == 'retrieve':
@@ -92,141 +82,47 @@ class RecipeViewSet(mixins.ListModelMixin,
     def perform_update(self, serializer):
         return serializer.save(author=self.request.user)
 
-    @action(
-        detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated],
-    )
-    def shopping_cart(self, request, id):
-        """Добавление/удаление в список покупок"""
+    @staticmethod
+    def method_post_delete(request, model, add_serializer, pk):
+        """
+        Вспомогательный метод для методов: def favorite и shopping_cart.
+        """
         user = request.user
-        recipe = get_object_or_404(Recipe, id=id)
-        if self.request.method == 'POST':
-            if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-                return Response(
-                    'Повтороное добавление',
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            try:
-                ShoppingCart.objects.create(user=user, recipe=recipe)
-            except IntegrityError as error:
-                if 'unique constraint' in error.args:
-                    return Response(
-                        'Повтороное добавление',
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            serializer = FavoriteShoppingCartSerializer(recipe)
+        recipe = get_object_or_404(Recipe, id=pk)
+        if request.method == 'POST':
+            if model.objects.filter(user=user,
+                                    recipe=recipe).exists():
+                return Response('Вы пытаетесь повторно добавить',
+                                status=status.HTTP_400_BAD_REQUEST)
+            model.objects.create(user=user, recipe=recipe)
+            serializer = add_serializer(recipe)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        try:
-            recipe_in_cart = ShoppingCart.objects.get(user=user, recipe=recipe)
-        except ObjectDoesNotExist:
-            return Response(
-                'Попытка не существующего удаления',
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        recipe_in_cart.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated],
-    )
-    def favorite(self, request, id):
-        """Добавление/удаление в избранное"""
-        # user = get_object_or_404(User, username=request.user)
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=id)
-        if self.request.method == 'POST':
-            if FavoriteRecipe.objects.filter(user=user,
-                                             recipe=recipe).exists():
-                return Response(
-                    'Повтороное добавление', status=status.HTTP_400_BAD_REQUEST
-                )
-            try:
-                FavoriteRecipe.objects.create(user=user, recipe=recipe)
-            except IntegrityError as error:
-                if 'unique constraint' in error.args:
-                    return Response(
-                        'Попытка повторного добавления',
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-
-            serializer = FavoriteShoppingCartSerializer(recipe)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        try:
-            favorite = FavoriteRecipe.objects.get(
-                user=user,
-                recipe=recipe,
-            )
-        except ObjectDoesNotExist:
-            return Response(
-                'Попытка не существующего удаления',
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        favorite = model.objects.get(user=user, recipe=recipe)
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    # @staticmethod
-    # def method_post(request, model, user, id):
-    #     """
-    #     Вспомогательный метод POST(добавление в список) для методов:
-    #     def favorite и shopping_cart.
-    #     """
-    #     recipe = get_object_or_404(Recipe, id=id)
-    #     model.objects.create(user=user, recipe=recipe)
-    #     data = {'user': user, 'recipe': recipe}
-    #     serializer = FavoriteShoppingCartSerializer(
-    #         data=data,
-    #         context={'request': request})
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(data=serializer.data,
-    #                         status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors,
-    #                     status=status.HTTP_400_BAD_REQUEST)
 
-    # @staticmethod
-    # def method_delete(request, model, user, id, error_message):
-    #     """
-    #     Вспомогательный метод DELETE(удаление из списка) для методов:
-    #     def favorite и shopping_cart.
-    #     """
-    #     # user = request.user
-    #     recipe = get_object_or_404(Recipe, id=id)
-    #     if not model.objects.filter(user=user, recipe=recipe).exists():
-    #         return Response({'errors': error_message},
-    #                         status=status.HTTP_400_BAD_REQUEST)
-    #     get_object_or_404(model, user=user, recipe=recipe).delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
+    def shopping_cart(self, request, pk):
+        """Добавление/удаление в список покупок"""
+        return self.method_post_delete(request,
+                                       ShoppingCart,
+                                       FavoriteShoppingCartSerializer,
+                                       pk)
 
-    # @action(methods=('post', 'delete'),
-    #         detail=True,
-    #         permission_classes=[IsAuthenticated],)
-    # def favorite(self, request, id):
-    #     """Добавление/удаление рецепта в избранное."""
-    #     user = get_object_or_404(User, username=request.user)
-    #     if request.method == 'POST':
-    #         return self.method_post(request, FavoriteRecipe, user, id)
-    #     else:
-    #         error_message = ('Вы пытаетесь удалить рецепт,'
-    #                          'которого нет у Вас в избранном')
-    #         return self.method_delete(request, FavoriteRecipe, user,
-    #                                   id, error_message)
-
-    # @action(methods=('post', 'delete'),
-    #         detail=True,
-    #         permission_classes=[IsAuthenticated],)
-    # def shopping_cart(self, request, id):
-    #     """Добавление/удаление рецепта в список покупок."""
-    #     user = get_object_or_404(User, username=request.user)
-    #     if request.method == 'POST':
-    #         return self.method_post(request, ShoppingCart, user, id)
-    #     else:
-    #         error_message = ('Вы пытаетесь удалить рецепт,'
-    #                          'которого нет у Вас в cписке покупок')
-    #         return self.method_delete(request, ShoppingCart,
-    #                                   id, error_message)
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
+    def favorite(self, request, pk):
+        return self.method_post_delete(request,
+                                       FavoriteRecipe,
+                                       FavoriteShoppingCartSerializer,
+                                       pk)
 
     @action(methods=['get'],
             detail=False,
@@ -268,11 +164,6 @@ class UserViewSet(ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     user = get_object_or_404(User, pk=kwargs.get('id'))
-    #     serializer = self.get_serializer(user)
-    #     return Response(data=serializer.data, status=status.HTTP_200_OK)
-
     @action(methods=('post', 'delete',),
             detail=True,
             permission_classes=[IsAuthenticated],)
@@ -305,12 +196,10 @@ class UserViewSet(ModelViewSet):
         user = request.user
         following = User.objects.filter(following__user=user)
         pages = self.paginate_queryset(following)
-        # if pages is not None:
-        #     serializer = FollowerSerializer(
-        #         pages, many=True, context={'request': request}
-        #     )
-        #     return self.get_paginated_response(serializer.data)
-        # serializer = self.get_serializer(pages, many=True)
-        # return Response(serializer.data)
+        if pages is not None:
+            serializer = FollowerSerializer(
+                pages, many=True, context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(pages, many=True)
-        return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)

@@ -8,9 +8,6 @@ from .validators import validate_username
 
 class User(AbstractUser):
     """Класс кастомных пользователей."""
-    # MAX_LENGTH_USER_EMAIL = 254
-    # MAX_LENGTH_USER_OTHER_FIELDS = 150
-    # REDEX_USER_USERNAME = r'^[\w.@+-]+$'
 
     email = models.EmailField(
         max_length=settings.MAX_LENGTH_USER_EMAIL,

@@ -1,11 +1,9 @@
+from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from django.conf import settings
-from django.contrib import admin
-
-from .models import (Ingredient, Recipe, RecipeIngredient,
-                     Tag, FavoriteRecipe, ShoppingCart)
+from .models import (FavoriteRecipe, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingCart, Tag)
 
 
 @admin.register(Tag)
@@ -30,18 +28,18 @@ class IngredientAdmin(ImportExportModelAdmin):
     ordering = ('id',)
 
 
-# class IngredientsInline(admin.TabularInline):
-#     model = RecipeIngredient
-#     extra = 1
+class IngredientsInline(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 1
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    # inlines = [IngredientsInline]
+    inlines = [IngredientsInline]
     list_display = ('id', 'name', 'author', 'amount_favorites',)
     search_fields = ('name', 'author',)
     list_filter = ('author', 'name', 'tags',)
-    # readonly_fields = ('author', 'amount_favorites')
+    readonly_fields = ('author', 'amount_favorites')
 
     @admin.display(description='Количество рецептов в избранном')
     def amount_favorites(self, obj):

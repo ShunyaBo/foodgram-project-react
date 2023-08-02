@@ -5,17 +5,11 @@ from django.db import models
 from users.models import User
 
 
-# MAX_LENGTH_CHARFIELD = 200
-
-
 class Tag(models.Model):
     """
     Класс Тег, для группировки рецептов по тегам.
     Связь с Recipe через Many-To-Many.
     """
-    # MAX_LENGTH_TAG_COLOR = 7
-    # REDEX_TAG_SLUG = r'^[-a-zA-Z0-9_]+$'
-
     name = models.CharField(
         max_length=settings.MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
@@ -39,7 +33,7 @@ class Tag(models.Model):
         null=False,
         validators=[RegexValidator(
             regex=settings.REDEX_TAG_SLUG,
-            message='Неверный формат Никнейма.')])
+            message='Неверный формат Никнейма')])
 
     class Meta:
         verbose_name = 'Тег'
@@ -204,7 +198,6 @@ class FavoriteRecipe(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
-        # unique_together = ('user', 'recipe')
 
     def __str__(self):
         return f'{self.user.username} добавил {self.recipe.name} в избраннное'
