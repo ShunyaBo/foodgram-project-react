@@ -12,6 +12,16 @@ services:
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
 
   backend:
     image: shunyabo/foodgram_backend
