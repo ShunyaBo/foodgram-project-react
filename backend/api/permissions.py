@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class IsAuthorAdmin(permissions.BasePermission):
+class IsAuthorAdminAuthenticated(permissions.BasePermission):
     """Доступ для автора и суперюзера."""
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS

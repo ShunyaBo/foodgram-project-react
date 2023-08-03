@@ -1,16 +1,20 @@
-from django.conf import settings
+# from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from .validators import validate_username
+from users.constants import (MAX_LENGTH_USER_CHARFIELD,
+                             MAX_LENGTH_USER_EMAIL,
+                             REDEX_USER_USERNAME)
+from users.validators import validate_username
 
 
 class User(AbstractUser):
     """Класс кастомных пользователей."""
 
     email = models.EmailField(
-        max_length=settings.MAX_LENGTH_USER_EMAIL,
+        # max_length=settings.MAX_LENGTH_USER_EMAIL,
+        max_length=MAX_LENGTH_USER_EMAIL,
         verbose_name='Электронная почта',
         help_text='Обязательное поле',
         unique=True,
@@ -18,31 +22,35 @@ class User(AbstractUser):
         null=False,
     )
     username = models.CharField(
-        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Никнейм',
         help_text='Обязательное поле',
         unique=True,
         blank=False,
         null=False,
-        validators=[RegexValidator(regex=settings.REDEX_USER_USERNAME,
+        validators=[RegexValidator(regex=REDEX_USER_USERNAME,
                                    message='Неверный формат Никнейма.'),
                     validate_username])
     first_name = models.CharField(
-        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Имя',
         help_text='Обязательное поле',
         blank=False,
         null=False,
     )
     last_name = models.CharField(
-        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Фамилия',
         help_text='Обязательное поле',
         blank=False,
         null=False,
     )
     password = models.CharField(
-        max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
+        max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Пароль',
         help_text='Обязательное поле',
         blank=False,
@@ -52,7 +60,13 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        ordering = ('id',)
+        ordering = ('username', 'last_name',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('username', 'email'),
+                name='username_email_unique'
+            ),
+        )
 
     def __str__(self):
         return self.username
@@ -79,7 +93,12 @@ class Follower(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        unique_together = ('user', 'author')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'author'),
+                name='user_author_unique'
+            ),
+        )
 
     def __str__(self):
         return f'{self.user.username} подписан на {self.author.username}'

@@ -11,11 +11,12 @@ from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import LimitPagePagination
-from api.permissions import IsAuthorAdmin
+from api.permissions import IsAuthorAdminAuthenticated
 from api.serializers import (FavoriteShoppingCartSerializer,
                              FollowerSerializer, IngredientSerializer,
                              RecipeCreateSerializer, RecipeGetSerializer,
                              TagSerializer, UserSerializer)
+from api.subfile import file_generation
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import Follower, User
@@ -65,7 +66,7 @@ class RecipeViewSet(mixins.ListModelMixin,
     """
 
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorAdmin,)
+    permission_classes = (IsAuthorAdminAuthenticated,)
     pagination_class = LimitPagePagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
@@ -134,15 +135,16 @@ class RecipeViewSet(mixins.ListModelMixin,
                         .values('ingredient__name',
                                 'ingredient__measurement_unit')
                         .annotate(amount=Sum('amount')))
-        shopping_list = list()
-        shopping_list.append('Ваш список покупок от Foodgram:\n')
-        for ingredient in shoppinglist:
-            shopping_list.append(
-                f'{ingredient["ingredient__name"]} - '
-                f'{ingredient["ingredient__measurement_unit"]} - '
-                f'{ingredient["amount"]}'
-            )
-            download_list = '\n'.join(shopping_list)
+        # shopping_list = list()
+        # shopping_list.append('Ваш список покупок от Foodgram:\n')
+        # for ingredient in shoppinglist:
+        #     shopping_list.append(
+        #         f'{ingredient["ingredient__name"]} - '
+        #         f'{ingredient["ingredient__measurement_unit"]} - '
+        #         f'{ingredient["amount"]}'
+        #     )
+        #     download_list = '\n'.join(shopping_list)
+        download_list = file_generation(shoppinglist)
         response = HttpResponse(download_list,
                                 content_type='text/plain; charset=utf-8')
         response['Content-Disposition'] = 'attachment; filename="file.txt"'
@@ -177,8 +179,7 @@ class UserViewSet(ModelViewSet):
                                 status=status.HTTP_400_BAD_REQUEST)
             Follower.objects.create(user=user, author=author,)
             serializer = FollowerSerializer(author,
-                                            context={"request": request},)
-            # serializer = self.get_serializer(author, many=True)
+                                            context={'request': request},)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             author_del = Follower.objects.filter(user=user, author=author)

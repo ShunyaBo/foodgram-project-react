@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='token')
 
-DEBUG = os.getenv('DEBUG', default=True)
+DEBUG = os.getenv('DEBUG', default=False)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ')
 
@@ -172,14 +172,3 @@ DJOSER = {
 AUTH_USER_MODEL = 'users.User'
 
 EMPLY_VALUE_DISPLAY = '-пусто-'
-
-# recipes/models.py
-MAX_LENGTH_CHARFIELD = 200
-MAX_LENGTH_TAG_COLOR = 7
-REDEX_TAG_SLUG = r'^[-a-zA-Z0-9_]+$'
-MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT = 1
-
-# users/models.py
-MAX_LENGTH_USER_EMAIL = 254
-MAX_LENGTH_USER_CHARFIELD = 150
-REDEX_USER_USERNAME = r'^[\w.@+-]+$'

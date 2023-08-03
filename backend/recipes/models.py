@@ -1,7 +1,11 @@
-from django.conf import settings
+# from django.conf import settings
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
+from recipes.constants import (MAX_LENGTH_CHARFIELD,
+                               MAX_LENGTH_TAG_COLOR,
+                               MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
+                               REDEX_TAG_SLUG)
 from users.models import User
 
 
@@ -11,7 +15,8 @@ class Tag(models.Model):
     Связь с Recipe через Many-To-Many.
     """
     name = models.CharField(
-        max_length=settings.MAX_LENGTH_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
         unique=True,
@@ -19,7 +24,8 @@ class Tag(models.Model):
         null=False,
     )
     color = models.CharField(
-        max_length=settings.MAX_LENGTH_TAG_COLOR,
+        # max_length=settings.MAX_LENGTH_TAG_COLOR,
+        max_length=MAX_LENGTH_TAG_COLOR,
         verbose_name='Цвет',
         help_text='Обязательное поле, Цветовой HEX-код, пример #63C144',
         unique=True,
@@ -27,14 +33,15 @@ class Tag(models.Model):
         null=False,
     )
     slug = models.SlugField(
-        max_length=settings.MAX_LENGTH_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Слаг',
         help_text='Обязательное поле, Латинскими буквами',
         unique=True,
         blank=False,
         null=False,
         validators=[RegexValidator(
-            regex=settings.REDEX_TAG_SLUG,
+            regex=REDEX_TAG_SLUG,
             message='Неверный формат Никнейма')])
 
     class Meta:
@@ -51,7 +58,8 @@ class Ingredient(models.Model):
     Связь с Recipe через модель RecipeIngredient (Many-To-Many).
     """
     name = models.CharField(
-        max_length=settings.MAX_LENGTH_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
         blank=False,
@@ -59,7 +67,8 @@ class Ingredient(models.Model):
     )
 
     measurement_unit = models.CharField(
-        max_length=settings.MAX_LENGTH_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Единицы измерения',
         help_text='Обязательное поле',
         blank=False,
@@ -78,7 +87,8 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     """Класс, описывающий рецепты."""
     name = models.CharField(
-        max_length=settings.MAX_LENGTH_CHARFIELD,
+        # max_length=settings.MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
         blank=False,
@@ -126,9 +136,9 @@ class Recipe(models.Model):
         null=False,
         validators=[
             MinValueValidator(
-                settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
+                MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
                 message=f'Время приготовления должно быть больше или равно'
-                        f' {settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT}'
+                        f' {MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT}'
                         f' минуте')
         ]
     )
@@ -168,9 +178,9 @@ class RecipeIngredient(models.Model):
         null=False,
         validators=[
             MinValueValidator(
-                settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
+                MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
                 message=f'Количество ингредиентов должно быть больше или равно'
-                        f' {settings.MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT}')
+                        f' {MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT}')
         ]
     )
 
@@ -182,7 +192,7 @@ class RecipeIngredient(models.Model):
 class FavoriteRecipe(models.Model):
     """
     Класс, описывающий избранные пользователем рецепты.
-    Модель связывает Recipe и  User.
+    Модель связывает Recipe и User.
     """
     user = models.ForeignKey(
         User,
@@ -200,6 +210,12 @@ class FavoriteRecipe(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='user_recipe_unique_in_favoriterecipe'
+            ),
+        )
 
     def __str__(self):
         return f'{self.user.username} добавил {self.recipe.name} в избраннное'
@@ -227,7 +243,12 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-        unique_together = ('user', 'recipe')
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='user_recipe_unique_in_shoppingcart'
+            ),
+        )
 
     def __str__(self):
         return (f'{self.user.username} добавил'
