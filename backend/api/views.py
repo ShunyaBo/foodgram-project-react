@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
-                                     ReadOnlyModelViewSet)
+                                     ReadOnlyModelViewSet,)
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import LimitPagePagination
@@ -15,10 +15,10 @@ from api.permissions import IsAuthorAdminAuthenticated
 from api.serializers import (FavoriteShoppingCartSerializer,
                              FollowerSerializer, IngredientSerializer,
                              RecipeCreateSerializer, RecipeGetSerializer,
-                             TagSerializer, UserSerializer)
+                             TagSerializer, UserSerializer,)
 from api.subfile import file_generation
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
+                            RecipeIngredient, ShoppingCart, Tag,)
 from users.models import Follower, User
 
 

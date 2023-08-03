@@ -1,10 +1,9 @@
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
-from recipes.constants import (MAX_LENGTH_CHARFIELD,
-                               MAX_LENGTH_TAG_COLOR,
+from recipes.constants import (MAX_LENGTH_CHARFIELD, MAX_LENGTH_TAG_COLOR,
                                MIN_VALIDATOR_COOK_TIME_INGRED_AMOUNT,
-                               REDEX_TAG_SLUG)
+                               REDEX_TAG_SLUG,)
 from users.models import User
 
 
