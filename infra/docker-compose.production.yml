@@ -41,7 +41,7 @@ services:
   nginx:
     image: nginx:1.19.3
     ports:
-      - "80:80"
+      - "8000:80"
     depends_on:
       - backend
     volumes:
