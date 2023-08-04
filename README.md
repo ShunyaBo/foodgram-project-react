@@ -188,10 +188,11 @@ ___
     sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
     ```
 
-- Собрать статические файлы для корректного отображения страниц: 
+- Собрать статические файлы для корректного отображения страниц и скопируйте ее в др директорию: 
 
     ```bash
-    udo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input 
+    sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic --no-input
+    sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /app/static/static/
     ```
 
 - Создать суперюзера:

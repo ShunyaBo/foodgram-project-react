@@ -11,7 +11,6 @@ class User(AbstractUser):
     """Класс кастомных пользователей."""
 
     email = models.EmailField(
-        # max_length=settings.MAX_LENGTH_USER_EMAIL,
         max_length=MAX_LENGTH_USER_EMAIL,
         verbose_name='Электронная почта',
         help_text='Обязательное поле',
@@ -20,7 +19,6 @@ class User(AbstractUser):
         null=False,
     )
     username = models.CharField(
-        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Никнейм',
         help_text='Обязательное поле',
@@ -31,7 +29,6 @@ class User(AbstractUser):
                                    message='Неверный формат Никнейма.'),
                     validate_username])
     first_name = models.CharField(
-        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Имя',
         help_text='Обязательное поле',
@@ -39,7 +36,6 @@ class User(AbstractUser):
         null=False,
     )
     last_name = models.CharField(
-        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Фамилия',
         help_text='Обязательное поле',
@@ -47,7 +43,6 @@ class User(AbstractUser):
         null=False,
     )
     password = models.CharField(
-        # max_length=settings.MAX_LENGTH_USER_CHARFIELD,
         max_length=MAX_LENGTH_USER_CHARFIELD,
         verbose_name='Пароль',
         help_text='Обязательное поле',

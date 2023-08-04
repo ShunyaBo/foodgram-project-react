@@ -13,7 +13,6 @@ class Tag(models.Model):
     Связь с Recipe через Many-To-Many.
     """
     name = models.CharField(
-        # max_length=settings.MAX_LENGTH_CHARFIELD,
         max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
@@ -22,7 +21,6 @@ class Tag(models.Model):
         null=False,
     )
     color = models.CharField(
-        # max_length=settings.MAX_LENGTH_TAG_COLOR,
         max_length=MAX_LENGTH_TAG_COLOR,
         verbose_name='Цвет',
         help_text='Обязательное поле, Цветовой HEX-код, пример #63C144',
@@ -31,7 +29,6 @@ class Tag(models.Model):
         null=False,
     )
     slug = models.SlugField(
-        # max_length=settings.MAX_LENGTH_CHARFIELD,
         max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Слаг',
         help_text='Обязательное поле, Латинскими буквами',
@@ -56,7 +53,6 @@ class Ingredient(models.Model):
     Связь с Recipe через модель RecipeIngredient (Many-To-Many).
     """
     name = models.CharField(
-        # max_length=settings.MAX_LENGTH_CHARFIELD,
         max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
@@ -65,7 +61,6 @@ class Ingredient(models.Model):
     )
 
     measurement_unit = models.CharField(
-        # max_length=settings.MAX_LENGTH_CHARFIELD,
         max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Единицы измерения',
         help_text='Обязательное поле',
@@ -85,7 +80,6 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     """Класс, описывающий рецепты."""
     name = models.CharField(
-        # max_length=settings.MAX_LENGTH_CHARFIELD,
         max_length=MAX_LENGTH_CHARFIELD,
         verbose_name='Название',
         help_text='Обязательное поле',
