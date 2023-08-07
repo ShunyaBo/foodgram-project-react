@@ -135,15 +135,6 @@ class RecipeViewSet(mixins.ListModelMixin,
                         .values('ingredient__name',
                                 'ingredient__measurement_unit')
                         .annotate(amount=Sum('amount')))
-        # shopping_list = list()
-        # shopping_list.append('Ваш список покупок от Foodgram:\n')
-        # for ingredient in shoppinglist:
-        #     shopping_list.append(
-        #         f'{ingredient["ingredient__name"]} - '
-        #         f'{ingredient["ingredient__measurement_unit"]} - '
-        #         f'{ingredient["amount"]}'
-        #     )
-        #     download_list = '\n'.join(shopping_list)
         download_list = file_generation(shoppinglist)
         response = HttpResponse(download_list,
                                 content_type='text/plain; charset=utf-8')
